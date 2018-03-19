@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+'''
+last update March 19th 2018. 
+'''
+
+
 
 #import timeit
 import numpy as np
@@ -13,7 +18,7 @@ from WL.L2.one_iterateWL_version2 import one_iterationWL
 from WL.L2.check_flatness import check_flatness
 
 
-def callibrateWL(**args):
+def callibrateWL(f, **args):
     ############
     N1 = args['N1']
     N2 = args['N2']
@@ -21,8 +26,9 @@ def callibrateWL(**args):
     precision_E = args['precision_E']
     precision_f = args['precision_f']
     flatness_min= args['flatness_min']
-    N = N1 * N2
+#    f = args['log_file']
     #### ######## initializations:
+    N = N1 * N2
     ### ex. f_factor = 2.7182
     f_factor = f_factor_init
     ### initializing the E - g_E - H(E) dynamic matrix
@@ -44,6 +50,7 @@ def callibrateWL(**args):
     ## idx_current 
     E_idx_current  = 0
     print '================================'
+    f.write('================================\n')
     print E_hist_density_mtx
     flatness_array = []
     f_factor_array = []
@@ -51,16 +58,12 @@ def callibrateWL(**args):
     itr=0
     condition1 = (itr<= int(args['num_steps_in_one_level_random_walk']))
     condition2 = (np.round(f_factor, precision_f) > np.round(1., precision_f))
+    ###
+    flatness = check_flatness(E_hist_density_mtx)
+    flatness_array.append(flatness)
+    f_factor_array.append(f_factor)
     while condition1 and condition2 :
-        ###
-        flatness = check_flatness(E_hist_density_mtx)
-        flatness_array.append(flatness)
-        f_factor_array.append(f_factor)
-#        print flatness
-        if flatness>flatness_min and itr!=0:
-            f_factor = np.sqrt(f_factor)
-            print '*****', itr,  flatness, ' %', 'f= ' , f_factor 
-            E_hist_density_mtx[:, 2] =  0
+        
         ###
         E_hist_density_mtx,\
         config_current,\
@@ -77,11 +80,24 @@ def callibrateWL(**args):
         ###
         itr+=1
         ###
+        flatness = check_flatness(E_hist_density_mtx)
+        flatness_array.append(flatness)
+        f_factor_array.append(f_factor)
+#        print flatness
+        if flatness>flatness_min and itr!=0:
+            f_factor = np.sqrt(f_factor)
+            print '*****', itr,  flatness, ' %', 'f= ' , f_factor 
+            log = '***** %d \t %2.2f'%(itr, flatness)+'%'+'f= %2.8f \n'%f_factor
+            f.write(log)
+            E_hist_density_mtx[:, 2] =  0
         condition1 = (itr<= int(args['num_steps_in_one_level_random_walk']))
         condition2 = (np.round(f_factor, precision_f) > np.round(1., precision_f))
         ####
-    print '*****' , flatness, ' %', 'f= ' , f_factor, condition1, condition2 
-
+    ########################################################################
+    ########################################################################
+    print '***************' , flatness, ' %', 'f= ' , f_factor, condition1, condition2 
+    log = '*********** \t %2.2f'%(flatness)+'%'+'f= %2.8f \n'%f_factor
+    f.write(log)
     return [
             E_hist_density_mtx, 
             f_factor, 
