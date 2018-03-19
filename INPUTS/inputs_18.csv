@@ -1,0 +1,2 @@
+J_const,E_field,power,N1,N2,a1_x,a1_y,tetha_fraction,first_neighb,max_cluster_size,f_factor_init,precision_f,precision_E,flatness_min,sub_itr_number,num_steps_in_one_level_random_walk,N_collection,N_collection_tollerance_factor
+1,0,3,13,13,1,0,3,TRUE,1,2.7182818285,4,2,90,5000,100000,100000,30
