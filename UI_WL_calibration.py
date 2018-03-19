@@ -57,7 +57,7 @@ args['first_neighb']=inputs['first_neighb'][0]
 ##
 #############
 ##### log file
-f = open('log_N1_%d_N2_%d_theta_%2.2f_J_const_%d_power_%d_nn_%s_inputID_%d.txt'\
+f = open('logFile_N1_%d_N2_%d_theta_%2.2f_J_const_%d_power_%d_nn_%s_inputID_%d.txt'\
          %(N1,N2, 
            theta, 
            float(inputs['J_const']),
