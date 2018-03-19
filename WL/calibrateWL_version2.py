@@ -51,6 +51,7 @@ def callibrateWL(f, **args):
     E_idx_current  = 0
     print '================================'
     f.write('================================\n')
+    f.write('\t \t flatness: \t f_factor convergence: \n')
     print E_hist_density_mtx
     flatness_array = []
     f_factor_array = []
@@ -86,8 +87,8 @@ def callibrateWL(f, **args):
 #        print flatness
         if flatness>flatness_min and itr!=0:
             f_factor = np.sqrt(f_factor)
-            print '*****', itr,  flatness, ' %', 'f= ' , f_factor 
-            log = '***** %d \t %2.2f'%(itr, flatness)+'%'+'f= %2.8f \n'%f_factor
+            print '*****', itr,  flatness, ' % ', 'f= ' , f_factor 
+            log = '***** %d \t %2.2f'%(itr, flatness)+'% '+'f= %2.8f \n'%f_factor
             f.write(log)
             E_hist_density_mtx[:, 2] =  0
         condition1 = (itr<= int(args['num_steps_in_one_level_random_walk']))
@@ -96,7 +97,7 @@ def callibrateWL(f, **args):
     ########################################################################
     ########################################################################
     print '***************' , flatness, ' %', 'f= ' , f_factor, condition1, condition2 
-    log = '*********** \t %2.2f'%(flatness)+'%'+'f= %2.8f \n'%f_factor
+    log = '*********** \t %2.2f'%(flatness)+'% '+'f= %2.8f \n'%f_factor
     f.write(log)
     return [
             E_hist_density_mtx, 
