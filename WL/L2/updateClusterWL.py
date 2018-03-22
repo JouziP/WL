@@ -4,7 +4,8 @@
 import numpy as np
 
 from WL.BasicFunctions.shuffleIndxs import shuffleIndxs
-from WL.L1.getEnergyDiffIfClusterFlip import getEnergyDiffIfClusterFlip
+#from WL.L1.getEnergyDiffIfClusterFlip import getEnergyDiffIfClusterFlip
+from WL.L1.getEnergyDiffIfClusterFlipV2 import getEnergyDiffIfClusterFlip
 
 def updateClusterWL(config_current, 
                   idxs_current, 
@@ -17,7 +18,11 @@ def updateClusterWL(config_current,
     ###
     cluster_size  = np.random.randint(1, max_cluster_size)
     cluster = idxs_new[:cluster_size]
-    dE_2add = getEnergyDiffIfClusterFlip(cluster, config_current, **args)
+#    dE_2add = getEnergyDiffIfClusterFlip(cluster, config_current, **args)
+    dE_2add = getEnergyDiffIfClusterFlip(cluster, 
+                                         config_current, 
+                                         E_current, 
+                                         **args)
     E_new = E_current + dE_2add
     #
     config_new = np.copy(config_current)

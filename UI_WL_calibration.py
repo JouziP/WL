@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 ## Lattice constructor
 from WL.Lattices.latticeConstructor import constructLattice
 from WL.Lattices.latticeLinkRemover import linkRemover
+from WL.Lattices.getGraphMatrix import getGraphMatrix
 
 ### 
 from WL.calibrateWL_version2 import callibrateWL
@@ -54,35 +55,49 @@ args['N1'] = N1
 args['N2'] = N2
 args['N_spins']=N1*N2
 args['first_neighb']=inputs['first_neighb'][0]
-##
+if 'up_to_rank' in inputs:
+    args['up_to_rank']=inputs['up_to_rank'][0]
+args['percentage_of_links_to_be_removed']=\
+        inputs['percentage_of_links_to_be_removed'][0]
 #############
 ##### log file
-f = open('logFile_N1_%d_N2_%d_theta_%2.2f_J_const_%d_power_%d_nn_%s_inputID_%d.txt'\
-         %(N1,N2, 
+log_filename =\
+ 'logFile_N1_%d_N2_%d_theta_%2.2f_J_const_%d_power_%d_nn_%s_inputID_%d.txt'\
+             %(N1,N2, 
            theta, 
            float(inputs['J_const']),
            float(inputs['power']),
            inputs['first_neighb'][0],
            int(input_id)
            )
-         ,'w')
+           
+
+f = open(log_filename,'w')
+
 input_log_message = 'input_id = %d \n\n'%int(input_id)
 f.write(input_log_message)
 ### general lattice info:
 f.write('--------------------\n')
-lattice_log_message= 'N1 = %d, N2 = %d, theta= %2.2f, \n'
+lattice_log_message= 'N1 = %d, N2 = %d, theta= %2.2f, \n'%(N1, N2, theta)
 f.write(lattice_log_message)
 f.write('--------------------\n\n')
 #############
 start_time = timeit.default_timer()
 f.write('building lattice :\n')
 print 'building lattice :'
+##
+##
 neighbors_table=constructLattice(**args)
-args['percentage_of_links_to_be_removed']=inputs['percentage_of_links_to_be_removed'][0]
-neighbors_table = linkRemover(neighbors_table, **args)
+args['neighbors_table']=neighbors_table
+G = getGraphMatrix(**args)
+args['G']=G
+##
+##
+
+#neighbors_table = linkRemover(neighbors_table, **args)
 elapsed = timeit.default_timer() - start_time
 #############
-args['neighbors_table']=neighbors_table
+
 print 'time elapsed: %s '%elapsed
 f.write('time elapsed: %s \n'%elapsed)
 print '------'  
@@ -122,17 +137,21 @@ args['N_collection_attempts'] = N_collection_attempts
 ###############################################################################
 ###############################################################################
 ###############################################################################
-###############################################################################
-#
+##############################################################################
+
 start_time = timeit.default_timer()
 print 'calibrating :'
 f.write('calibrating :\n')
+f.close()
 #args['lof_file']=f
-#
-parameters =callibrateWL(f, **args)
+##
+##
+parameters =callibrateWL(log_filename, **args)
+##
 ##
 elapsed = timeit.default_timer() - start_time
 print 'time elapsed: %s '%elapsed
+f = open(log_filename,'a')
 f.write('time elapsed: %s \n'%elapsed)
 #params =>> 
 #[
@@ -177,12 +196,13 @@ filename1 =  'HAMILT_J_%d_E_%d_power_%d_'%(
                     args['power'],
                   )
 
-filename2 =  'LATTICE_N1_%d_N2_%d_theta_%1.2f_nn_%s_links_%d_'%(
+filename2 =  'LATTICE_N1_%d_N2_%d_theta_%1.2f_nn_%s_links_%d_K_%d_'%(
                     args['N1'],
                     args['N2'],
                     args['theta'],
                     args['first_neighb'],
-                    args['percentage_of_links_to_be_removed']
+                    args['percentage_of_links_to_be_removed'],
+                    args['up_to_rank'],
                   )
 filename3 =  'MC_clusterSize_%d_'%(
                     args['max_cluster_size'],
