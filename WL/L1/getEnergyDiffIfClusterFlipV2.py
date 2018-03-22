@@ -13,16 +13,26 @@ def getEnergyDiffIfClusterFlip(cluster,
     config_new = np.copy(config_current)
     for node in cluster:
         config_new[node] = config_new[node] * -1
-    config_new = np.array(config_new)
+    config_new = np.matrix(config_new)
+    #################################
+    U_reduced = G[0]
+    V_reduced = G[1]
+    G = G[2]
+    #################################
+#    L     = np.dot(config_new, U_reduced)
+#    R     = np.dot(V_reduced, np.transpose(config_new))
+#    E_new = np.dot(np.dot(config_new, U_reduced), 
+#                   np.dot(V_reduced, np.transpose(config_new)))[0,0]
+#    print E_new
     E_new = np.dot(np.dot(config_new, G), np.transpose(config_new))[0,0]
     energy_2b_added_if_cluster_is_flipped = E_new - E_current
     ###
     return energy_2b_added_if_cluster_is_flipped
-                
+    
 
 
 
-##########  
+###########  
 #import timeit
 #import pandas as pd
 #from WL.L1.getEnergyOfConfig import getEnergyOfConfig
@@ -31,7 +41,7 @@ def getEnergyDiffIfClusterFlip(cluster,
 #from WL.BasicFunctions.getRandomConfig import getRandomConfig
 #from WL.Lattices.latticeConstructor import constructLattice
 #
-#input_id = -1   
+#input_id = 0  
 #print input_id
 #
 #
@@ -67,6 +77,9 @@ def getEnergyDiffIfClusterFlip(cluster,
 #args['N2'] = N2
 #args['N_spins']=N1*N2
 #args['first_neighb']=inputs['first_neighb'][0]
+#args['percentage_of_links_to_be_removed']=\
+#        inputs['percentage_of_links_to_be_removed'][0]
+#args['depth']=N
 ###
 ##############
 ###### log file
@@ -114,22 +127,22 @@ def getEnergyDiffIfClusterFlip(cluster,
 #
 #print E_current, 'time= ' , elapsed
 #
-#start_time = timeit.default_timer()
-#E=np.dot(np.dot(np.array(config_current), G), np.transpose(np.array(config_current)) )[0,0]
-#elapsed = timeit.default_timer() - start_time
+##start_time = timeit.default_timer()
+##E=np.dot(np.dot(np.array(config_current), G), np.transpose(np.array(config_current)) )[0,0]
+##elapsed = timeit.default_timer() - start_time
 #
-#print E, 'New time= ' , elapsed
+##print E, 'New time= ' , elapsed
 #
 #
 #start_time = timeit.default_timer()
 #dE = getEnergyDiffIfClusterFlip(cluster, 
 #                               config_current, 
-#                               E,
+#                               E_current,
 #                                **args)
 #elapsed = timeit.default_timer() - start_time
 #
 #print dE, 'New s Time = ' , elapsed
-#
+##
 #start_time = timeit.default_timer()
 #dE_old = getEnergyDiffIfClusterFlipOld(cluster, 
 #                               config_current, 

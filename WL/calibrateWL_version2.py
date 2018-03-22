@@ -8,7 +8,7 @@ last update March 19th 2018.
 
 #import timeit
 import numpy as np
-
+import timeit
 from WL.BasicFunctions.getRandomConfig import getRandomConfig
 
 
@@ -18,7 +18,7 @@ from WL.L2.one_iterateWL_version2 import one_iterationWL
 from WL.L2.check_flatness import check_flatness
 
 
-def callibrateWL(f, **args):
+def callibrateWL(log_filename, **args):
     ############
     N1 = args['N1']
     N2 = args['N2']
@@ -50,8 +50,10 @@ def callibrateWL(f, **args):
     ## idx_current 
     E_idx_current  = 0
     print '================================'
+    f = open(log_filename,'a')
     f.write('================================\n')
     f.write('\t \t flatness: \t f_factor convergence: \n')
+    f.close()
     print E_hist_density_mtx
     flatness_array = []
     f_factor_array = []
@@ -63,6 +65,7 @@ def callibrateWL(f, **args):
     flatness = check_flatness(E_hist_density_mtx)
     flatness_array.append(flatness)
     f_factor_array.append(f_factor)
+    start_time = timeit.default_timer()
     while condition1 and condition2 :
         
         ###
@@ -84,12 +87,17 @@ def callibrateWL(f, **args):
         flatness = check_flatness(E_hist_density_mtx)
         flatness_array.append(flatness)
         f_factor_array.append(f_factor)
-#        print flatness
+#        print itr, flatness#, E_hist_density_mtx[:,0]
         if flatness>flatness_min and itr!=0:
+            elapsed = timeit.default_timer() - start_time
             f_factor = np.sqrt(f_factor)
-            print '*****', itr,  flatness, ' % ', 'f= ' , f_factor 
+            print '*****', itr,  flatness, ' % ', 'f= ' , f_factor, \
+                        'time elapsed: %s '%elapsed
+            start_time = timeit.default_timer()
+            f = open(log_filename,'a')
             log = '***** %d \t %2.2f'%(itr, flatness)+'% '+'f= %2.8f \n'%f_factor
             f.write(log)
+            f.close()
             E_hist_density_mtx[:, 2] =  0
         condition1 = (itr<= int(args['num_steps_in_one_level_random_walk']))
         condition2 = (np.round(f_factor, precision_f) > np.round(1., precision_f))
@@ -97,8 +105,10 @@ def callibrateWL(f, **args):
     ########################################################################
     ########################################################################
     print '***************' , flatness, ' %', 'f= ' , f_factor, condition1, condition2 
+    f = open(log_filename,'a')
     log = '*********** \t %2.2f'%(flatness)+'% '+'f= %2.8f \n'%f_factor
     f.write(log)
+    f.close()
     return [
             E_hist_density_mtx, 
             f_factor, 

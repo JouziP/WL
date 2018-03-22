@@ -39,6 +39,7 @@ args['power']= float(inputs['power'])     #3.0
 ##########  lattice
 N1=int(inputs['N1'])
 N2=int(inputs['N2'])
+N = N1*N2
 ### 
 a1_x= float(inputs['a1_x'])
 a1_y= float(inputs['a1_y'])
@@ -89,6 +90,7 @@ print 'building lattice :'
 ##
 neighbors_table=constructLattice(**args)
 args['neighbors_table']=neighbors_table
+args['depth']=N
 G = getGraphMatrix(**args)
 args['G']=G
 ##
@@ -190,7 +192,7 @@ N  = args['N1'] * args['N2']
 
 
 ###########################  save on file
-filename1 =  'HAMILT_J_%d_E_%d_power_%d_'%(
+filename1 =  'HAMILT_J_%2.2f_E_%d_power_%d_'%(
                     args['J_const'],
                     args['E_field'],
                     args['power'],

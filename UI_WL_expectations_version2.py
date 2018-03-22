@@ -28,7 +28,7 @@ from WL.L2.getEntropy import getEntropy
 ##############################################################################
 ##############################################################################
 #################################
-input_id = 16 #sys.argv[1]
+input_id = 0 #sys.argv[1]
 print input_id
 
 
@@ -65,7 +65,8 @@ args['N1'] = N1
 args['N2'] = N2
 args['N_spins']=N1*N2
 args['first_neighb']=inputs['first_neighb'][0]
-#args['percentage_of_links_to_be_removed']=inputs['percentage_of_links_to_be_removed'][0]
+args['percentage_of_links_to_be_removed']=inputs['percentage_of_links_to_be_removed'][0]
+args['up_to_rank']=inputs['up_to_rank']
 #######################
 print 'lattice specs:'
 print 'N1= ' , N1, 'N2= ', N2,\
@@ -125,17 +126,30 @@ args['N_collection_attempts'] = N_collection_attempts
 ###################################################################
 ################## Set inputs
 
-filename1 =  'HAMILT_J_%d_E_%d_power_%d_'%(
+filename1 =  'HAMILT_J_%2.2f_E_%d_power_%d_'%(
                     args['J_const'],
                     args['E_field'],
                     args['power'],
                   )
-filename2 =  'LATTICE_N1_%d_N2_%d_theta_%1.2f_nn_%s_'%(
+#filename1 =  'HAMILT_J_%d_E_%d_power_%d_'%(
+#                    args['J_const'],
+#                    args['E_field'],
+#                    args['power'],
+#                  )
+#filename2 =  'LATTICE_N1_%d_N2_%d_theta_%1.2f_nn_%s_'%(
+#                    args['N1'],
+#                    args['N2'],
+#                    args['theta'],
+#                    args['first_neighb'],
+##                    args['percentage_of_links_to_be_removed']
+#                  )
+filename2 =  'LATTICE_N1_%d_N2_%d_theta_%1.2f_nn_%s_links_%d_K_%d_'%(
                     args['N1'],
                     args['N2'],
                     args['theta'],
                     args['first_neighb'],
-#                    args['percentage_of_links_to_be_removed']
+                    args['percentage_of_links_to_be_removed'],
+                    args['up_to_rank'],
                   )
 #filename2 =  'LATTICE_N1_%d_N2_%d_theta_%1.2f_nn_%s_links_%d_'%(
 #                    args['N1'],
@@ -165,118 +179,121 @@ E_hist_density_mtx_df     = pd.read_csv(filename+'E_hist_density_mtx.csv')
 ################################################################
 N = args['N1']*args['N2']
 
-energies = E_hist_density_mtx_df.values[:, 0]
+energies = (E_hist_density_mtx_df.values[:, 0])/args['J_const']
 unormalizaed_log_E = E_hist_density_mtx_df.values[:, 1]
 
-scale= 1./N
+scale= 1 #1./N
 energies =  energies* scale
 E_min = np.min(energies)
-##########
-num_temps = 1000
-dt = 0.01*scale
-T_0 = 0.05*scale
-Temps = [dt*i + T_0 for i in range(num_temps)]
-########
-HeatC_expt=[]
-energies_expt=[]
-Z_Ts = []
-S_t=[]
+
+
+#
+###########
+#num_temps = 1000
+#dt = 0.01*scale
+#T_0 = 0.05*scale
+#Temps = [dt*i + T_0 for i in range(num_temps)]
+#########
+#HeatC_expt=[]
+#energies_expt=[]
+#Z_Ts = []
+#S_t=[]
 ########
 idx_to_measure = np.where(np.min(unormalizaed_log_E)==unormalizaed_log_E)[0]
 ########
 plt.bar(energies / scale,
         unormalizaed_log_E-unormalizaed_log_E[idx_to_measure])
-########
-
-for Temp in Temps:
-    ### expectations = <E-E_min>, <(E-E_min)**2>, ... = < >_c
-    expt_energy, expt_E2, Z_T =  getExpectations(energies, 
-                                                 unormalizaed_log_E, 
-                                                 Temp, 
-                                                 idx_to_measure)
-    S = getEntropy(unormalizaed_log_E, energies, Temp, N, expt_energy+E_min)
-#    ############
-    HeatC_expt.append((expt_E2 - expt_energy**2)*1./Temp**2) 
-    energies_expt.append(expt_energy + E_min)
-    S_t.append(S)
-
-print 'Residual Entropy = ', S_t[0]
-    
-fig, frame =plt.subplots(1,1, figsize=[8,5])
-##
-#frame[0].plot(np.array(Temps)/scale, np.array(HeatC_expt), '-o', label = 'Hc')
-#frame[0].vlines(2.27,0, 2*N)
-#frame[1].plot(np.array(Temps)/scale, np.array(energies_expt), '-o', label = '<E>')
-frame.plot(np.array(Temps)/scale, S_t  , '-o', label = 'S, N1=%d , N2=%d'%(N1, N2))
-##frame[3].plot(Temps, np.array(log_Z_Ts)  , '-o', label = 'logZ')
-##
-frame.legend(loc='lower right')
-#frame[1].legend()
-#frame[2].legend()
-
-fig.savefig(OUTPUT+'N1_%d_N2_%d.jpg'%(N1, N2), format='jpg', dpi=100)
-
-##frame[3].legend()
+#########
 #
-###############################################################################
-###############################################################################
-####################################################################
-################### save outputs
+#for Temp in Temps:
+#    ### expectations = <E-E_min>, <(E-E_min)**2>, ... = < >_c
+#    expt_energy, expt_E2, Z_T =  getExpectations(energies, 
+#                                                 unormalizaed_log_E, 
+#                                                 Temp, 
+#                                                 idx_to_measure)
+#    S = getEntropy(unormalizaed_log_E, energies, Temp, N, expt_energy+E_min)
+##    ############
+#    HeatC_expt.append((expt_E2 - expt_energy**2)*1./Temp**2) 
+#    energies_expt.append(expt_energy + E_min)
+#    S_t.append(S)
 #
-#filename1 =  'HAMILT_J_%d_E_%d_power_%d_'%(
-#                    args['J_const'],
-#                    args['E_field'],
-#                    args['power'],
-#                  )
-#filename2 =  'LATTICE_N1_%d_N2_%d_theta_%1.2f_nn_%s_links_%d'%(
-#                    args['N1'],
-#                    args['N2'],
-#                    args['theta'],
-#                    args['first_neighb'],
-#                    args['percentage_of_links_to_be_removed']
-#                  )
-#filename3 =  'MC_clusterSize_%d_'%(
-#                    args['max_cluster_size'],
-#                  )
-#
-#filename4 =  'CALLIBR_f_init_%2.2f_flatness_min_%d_sub_itr_number_%d_f_pcisn_%d_'%(
-#                    args['f_factor_init'],
-#                    args['flatness_min'],
-#                    args['sub_itr_number'],
-#                    args['precision_f'],
-#                  )
-#
-#OUTPUT = './OUTPUTS/'
-#
-#filename = OUTPUT + filename1 + filename2 + filename3 + filename4
-#
-#
-#
-##
-#HeatC_expt_df = pd.DataFrame(np.array(HeatC_expt))
-#HeatC_expt_df.index=Temps
-#HeatC_expt_df.to_csv(filename+'HeatC_expt.csv')
-#
+#print 'Residual Entropy = ', S_t[0]
+#    
+#fig, frame =plt.subplots(1,1, figsize=[8,5])
 ###
-#energies_expt_df = pd.DataFrame(np.array(energies_expt))
-#energies_expt_df.index=Temps
-#energies_expt_df.to_csv(filename+'energies_expt.csv')
+##frame[0].plot(np.array(Temps)/scale, np.array(HeatC_expt), '-o', label = 'Hc')
+##frame[0].vlines(2.27,0, 2*N)
+##frame[1].plot(np.array(Temps)/scale, np.array(energies_expt), '-o', label = '<E>')
+#frame.plot(np.array(Temps)/scale, S_t  , '-o', label = 'S, N1=%d , N2=%d'%(N1, N2))
+###frame[3].plot(Temps, np.array(log_Z_Ts)  , '-o', label = 'logZ')
 ###
-#S_t_df = pd.DataFrame(np.array(S_t))
-#S_t_df.index=Temps
-#S_t_df.to_csv(filename+'S_t.csv')
+#frame.legend(loc='lower right')
+##frame[1].legend()
+##frame[2].legend()
+#
+#fig.savefig(OUTPUT+'N1_%d_N2_%d.jpg'%(N1, N2), format='jpg', dpi=100)
+#
+###frame[3].legend()
+##
+################################################################################
+################################################################################
+#####################################################################
+#################### save outputs
+##
+##filename1 =  'HAMILT_J_%d_E_%d_power_%d_'%(
+##                    args['J_const'],
+##                    args['E_field'],
+##                    args['power'],
+##                  )
+##filename2 =  'LATTICE_N1_%d_N2_%d_theta_%1.2f_nn_%s_links_%d'%(
+##                    args['N1'],
+##                    args['N2'],
+##                    args['theta'],
+##                    args['first_neighb'],
+##                    args['percentage_of_links_to_be_removed']
+##                  )
+##filename3 =  'MC_clusterSize_%d_'%(
+##                    args['max_cluster_size'],
+##                  )
+##
+##filename4 =  'CALLIBR_f_init_%2.2f_flatness_min_%d_sub_itr_number_%d_f_pcisn_%d_'%(
+##                    args['f_factor_init'],
+##                    args['flatness_min'],
+##                    args['sub_itr_number'],
+##                    args['precision_f'],
+##                  )
+##
+##OUTPUT = './OUTPUTS/'
+##
+##filename = OUTPUT + filename1 + filename2 + filename3 + filename4
+##
+##
+##
 ###
-#Z_Ts_df = pd.DataFrame(np.array(Z_Ts))
-#Z_Ts_df.index=Temps
-#Z_Ts_df.to_csv(filename+'Z_Ts.csv')
-#
-#others= {
-#        'Temp_inf':Temp,
-#        'expt_energy_inf':expt_energy_inf,
-#        'Z_T_inf':Z_T_inf,
-#        'S_inf':S_inf,
-#        'discount_factor':1./(discount_inverse),        
-#        }
-#
-#others_df = pd.DataFrame.from_dict(others, orient='index')
-#others_df.to_csv(filename+'others.csv')
+##HeatC_expt_df = pd.DataFrame(np.array(HeatC_expt))
+##HeatC_expt_df.index=Temps
+##HeatC_expt_df.to_csv(filename+'HeatC_expt.csv')
+##
+####
+##energies_expt_df = pd.DataFrame(np.array(energies_expt))
+##energies_expt_df.index=Temps
+##energies_expt_df.to_csv(filename+'energies_expt.csv')
+####
+##S_t_df = pd.DataFrame(np.array(S_t))
+##S_t_df.index=Temps
+##S_t_df.to_csv(filename+'S_t.csv')
+####
+##Z_Ts_df = pd.DataFrame(np.array(Z_Ts))
+##Z_Ts_df.index=Temps
+##Z_Ts_df.to_csv(filename+'Z_Ts.csv')
+##
+##others= {
+##        'Temp_inf':Temp,
+##        'expt_energy_inf':expt_energy_inf,
+##        'Z_T_inf':Z_T_inf,
+##        'S_inf':S_inf,
+##        'discount_factor':1./(discount_inverse),        
+##        }
+##
+##others_df = pd.DataFrame.from_dict(others, orient='index')
+##others_df.to_csv(filename+'others.csv')

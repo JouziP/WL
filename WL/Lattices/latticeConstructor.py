@@ -10,6 +10,9 @@ import numpy as np
 
 from WL.BasicFunctions.cleanNeighbors import cleanNeighbors
 
+from latticeLinkRemover import linkRemover
+from rankNeighbs import getUpToRankNeighbs
+
 def getFirstneighbors(neighb_table):
     pass
 
@@ -52,7 +55,17 @@ def constructLattice(**kwgs):
     neighbors_array = []
     for n in range(num_sites):
         neighbors_array.append(getNeighborTableGeneralized(n, **kwgs))
-    return neighbors_array
+    ######
+    neighbors_array = linkRemover(neighbors_array, **kwgs)
+    ###### refine
+    neighbors_array_refined=[]
+    for n in range(len(neighbors_array)):
+        refined=[]
+        for j in range(neighbors_array[n].shape[0]):
+            if np.round(neighbors_array[n][j, 1], 8)!=np.round(0, 8):
+                refined.append(neighbors_array[n][j, :])
+        neighbors_array_refined.append(np.array(refined))
+    return neighbors_array_refined
 
 
 
@@ -131,10 +144,24 @@ def getNeighborTableGeneralized(idx, **kwgs):
             strength = 1./distance**(power)
             #
             neighbs.append([i, strength])
+
+            #
+            #####
             if kwgs['first_neighb']==True:
+#                print neighbs
+#                print '=========='
                 all_neighbors = cleanNeighbors(neighbs)
                 neighbs=all_neighbors[0]
-            ###
+    #####
+    if kwgs['first_neighb']==False:
+        if 'up_to_rank' in kwgs:
+            up_to_rank=kwgs['up_to_rank']
+#            print neighbs
+#            print '=========='
+            neighbs=getUpToRankNeighbs(up_to_rank, 
+                               neighbs
+                               )
+    ###
     return np.array(neighbs)
 
     
