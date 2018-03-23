@@ -8,11 +8,16 @@ def getGraphMatrix(**args):
     N1 = args['N1']
     N2 = args['N2']
     depth = args['depth']
+    J_const = args['J_const']
+    E_field= args['E_field']
+    E_field_type=args['E_field_type']
+    ###########################
     N = N1 *N2 
     G = np.zeros([N, N])
-    J_const = args['J_const']
     for i in range(N):
         neighbs= neighbors_table[i]
+        if E_field_type=='random':
+            G[i,i]=E_field * np.random.uniform(-1,+1)
         for n in range(neighbs.shape[0]):
             j = int(neighbs[n, 0])
             G[i, j] = np.round(neighbs[n, 1], 5) * np.round(J_const, 5) *1./2

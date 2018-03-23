@@ -54,7 +54,7 @@ def one_iterationWL(f_factor,
         log_g_E_new = E_hist_density_mtx[E_idx_new, 1]
         log_g_E_current = E_hist_density_mtx[E_idx_current, 1]
         #
-        Prob_transition = min([1, np.exp(log_g_E_current-log_g_E_new)])
+        Prob_transition = min([1, np.exp(np.float128(log_g_E_current)-np.float128(log_g_E_new) )])
         if Prob_transition==np.inf or Prob_transition==np.nan:
             print Prob_transition
         #

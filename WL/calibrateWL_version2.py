@@ -87,7 +87,7 @@ def callibrateWL(log_filename, **args):
         flatness = check_flatness(E_hist_density_mtx)
         flatness_array.append(flatness)
         f_factor_array.append(f_factor)
-#        print itr, flatness#, E_hist_density_mtx[:,0]
+#        print itr, flatness, E_current#, E_hist_density_mtx[:,0]
         if flatness>flatness_min and itr!=0:
             elapsed = timeit.default_timer() - start_time
             f_factor = np.sqrt(f_factor)
